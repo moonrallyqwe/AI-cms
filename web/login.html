@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI知识库 - 登录</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --vp-brand: #3b82f6;
+      --vp-brand-light: #60a5fa;
+      --vp-brand-dark: #2563eb;
+      --vp-bg: #ffffff;
+      --vp-bg-alt: #f8fafc;
+      --vp-text-1: #1e293b;
+      --vp-text-2: #64748b;
+      --vp-border: #e2e8f0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid var(--vp-border);
+    }
+    .logo { text-align: center; margin-bottom: 36px; }
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--vp-brand) 0%, var(--vp-brand-dark) 100%);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .logo-icon svg { width: 36px; height: 36px; fill: white; }
+    .logo h1 { font-size: 24px; font-weight: 600; color: var(--vp-text-1); margin-bottom: 8px; }
+    .logo p { font-size: 14px; color: var(--vp-text-2); }
+    .form-group { margin-bottom: 24px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--vp-text-1); margin-bottom: 8px; }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--vp-border);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: var(--vp-brand); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .btn {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--vp-brand) 0%, var(--vp-brand-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59,130,246,0.3); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error { color: #ef4444; font-size: 14px; margin-top: 16px; text-align: center; padding: 12px; background: #fef2f2; border-radius: 8px; display: none; }
+    .footer { text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--vp-border); }
+    .footer p { font-size: 13px; color: var(--vp-text-2); margin-bottom: 12px; }
+    .footer code { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <h1>AI 知识库</h1>
+      <p>AI-Friendly CMS</p>
+    </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="username" required placeholder="请输入用户名">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="password" required placeholder="请输入密码">
+      </div>
+      <button type="submit" class="btn" id="submitBtn">登 录</button>
+      <div class="error" id="error"></div>
+    </form>
+    <div class="footer">
+      <p>测试账号</p>
+      <div><code>admin</code> / <code>admin123</code> 管理员</div>
+      <div style="margin-top:4px"><code>user</code> / <code>user123</code> 普通用户</div>
+    </div>
+  </div>
+  <script>
+    const API = 'http://192.168.31.120:3001';
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const error = document.getElementById('error');
+      btn.disabled = true; btn.textContent = '登录中...';
+      error.style.display = 'none';
+      try {
+        const res = await fetch(API + '/api/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username: document.getElementById('username').value, password: document.getElementById('password').value}),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) window.location.href = 'home.html';
+        else { error.textContent = data.error || '登录失败'; error.style.display = 'block'; }
+      } catch (err) { error.textContent = '网络错误: ' + err.message; error.style.display = 'block'; }
+      btn.disabled = false; btn.textContent = '登 录';
+    });
+  </script>
+</body>
+</html>

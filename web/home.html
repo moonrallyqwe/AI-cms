@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI知识库</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --vp-brand: #3b82f6;
+            --vp-brand-light: #60a5fa;
+            --vp-brand-dark: #2563eb;
+            --vp-text-1: #1e293b;
+            --vp-text-2: #64748b;
+            --vp-border: #e2e8f0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--vp-brand) 0%, var(--vp-brand-dark) 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .header h1 { font-size: 28px; font-weight: 600; }
+        .header .subtitle { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .doc-list { display: grid; gap: 16px; }
+        .doc-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 1px solid var(--vp-border);
+            transition: all 0.2s;
+        }
+        .doc-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .doc-card h3 { margin-bottom: 8px; }
+        .doc-card h3 a { color: var(--vp-text-1); text-decoration: none; }
+        .doc-card h3 a:hover { color: var(--vp-brand); }
+        .doc-card .tags { font-size: 13px; color: var(--vp-text-2); }
+        .doc-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 1px solid var(--vp-border);
+        }
+        .doc-content h2 { color: var(--vp-text-1); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--vp-border); }
+        .back-btn {
+            background: linear-gradient(135deg, var(--vp-brand) 0%, var(--vp-brand-dark) 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        a { color: var(--vp-brand); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .empty { text-align: center; padding: 60px 20px; color: var(--vp-text-2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI知识库</h1>
+            <div class="subtitle">AI-Friendly CMS</div>
+        </div>
+        <div id="app"></div>
+    </div>
+    <script>
+        const API = 'http://192.168.31.120:3001';
+        
+        const params = new URLSearchParams(window.location.search);
+        const docId = params.get('id');
+        
+        async function load() {
+            if (docId) {
+                const res = await fetch(API + '/api/docs/' + docId);
+                const doc = await res.json();
+                document.getElementById('app').innerHTML = 
+                    '<a class="back-btn" href="./home.html">← 返回列表</a>' +
+                    '<div class="doc-content">' +
+                    '<h2>' + doc.title + '</h2>' +
+                    '<div style="line-height:1.8;">' + doc.content + '</div>' +
+                    '</div>';
+            } else {
+                const res = await fetch(API + '/api/docs');
+                const docs = await res.json();
+                if (!docs || docs.length === 0) {
+                    document.getElementById('app').innerHTML = '<div class="empty">暂无文档</div>';
+                    return;
+                }
+                let html = '<div class="doc-list">';
+                for (const d of docs) {
+                    html += '<div class="doc-card">' +
+                        '<h3><a href="?id=' + d.id + '">' + d.title + '</a></h3>' +
+                        '<div class="tags">标签: ' + (d.tags ? d.tags.join(', ') : '无') + '</div>' +
+                        '</div>';
+                }
+                html += '</div>';
+                document.getElementById('app').innerHTML = html;
+            }
+        }
+        load();
+    </script>
+</body>
+</html>
